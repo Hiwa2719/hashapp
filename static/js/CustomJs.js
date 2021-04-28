@@ -43,20 +43,20 @@ $(document).ready(function () {
         })
     })
 
-    // register/login button
-    let authButton = $('.authentication .register, .login')
-    authButton.click(function (event){
-        event.preventDefault()
+    // register button
+    let registerButton = $('.authentication .register')
+    registerButton.click(function (event){
+        event.preventDefault();
         let buttonText = $(this).text()
         $('.modal-body h5').text(buttonText)
 
         $.ajax({
-            url: '/get-auth-form/',
+            url: '/register/',
             method: 'GET',
-            data: {'button': buttonText},
             success: function (data){
                 console.log('success')
-                $('.modal-body').append(data.form)
+                let modalBodyInner = $('.modal-body .modal-body-inner')
+                modalBodyInner.html(data.form)
                 $('.modal-btn').click()
             },
             error: function (errorData){
@@ -68,7 +68,8 @@ $(document).ready(function () {
 
     // logout button
     let logoutButton = $('.authentication .logout')
-    logoutButton.click(function(){
+    logoutButton.click(function(event){
+        event.preventDefault();
         $.ajax({
             url: '/logout/',
             method: 'GET',
@@ -76,6 +77,7 @@ $(document).ready(function () {
                 console.log('success logout')
                 $('.modal-body .close').click()
                 logoutButton.addClass('d-none')
+                $('.authentication .account').addClass('d-none')
                 authButton.removeClass('d-none')
             },
             error: function (errorData){

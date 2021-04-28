@@ -16,7 +16,7 @@
                 <div class="authentication my-1 align-self-end mr-2 mb-5 text-primary pointer-event">
                     <a href="" class="register">Register</a>/
                     <a href="" class="login">Login</a>
-                    <a href="{% url 'sha256:account' %}" class="d-none">My Account</a>
+                    <a href="{% url 'sha256:account' %}" class="account d-none">My Account</a>
                     <a href="{% url 'logout' %}" class="logout d-none">Log out</a>
                 </div>
                 <h1 class="text-center">SHA256 Generator</h1>
@@ -50,6 +50,7 @@
                 <span aria-hidden="true">&times;</span>
               </button>
               <h5 class="text-center">Register</h5>
+              <div class="modal-body-inner"></div>
           </div>
         </div>
       </div>

@@ -20,6 +20,7 @@ from sha256 import views as ShaViews
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', ShaViews.LoginView.as_view(), name='login'),
+    path('register/', ShaViews.RegisterView.as_view(), name='register'),
+    path('logout/', ShaViews.LogoutView.as_view(), name='logout'),
     path('', include('sha256.urls')),
-
 ]

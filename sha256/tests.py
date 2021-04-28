@@ -1,6 +1,6 @@
 import json
 from django.test import TestCase
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, get_user
 from django.urls import reverse
 
 from .models import Hash
@@ -71,6 +71,8 @@ class PublicViewUnitTest(TestCase):
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'authentication successful')
+        self.assertIn('_auth_user_id', self.client.session)
+        self.assertEqual(int(self.client.session.get('_auth_user_id')), user.id)
 
     def test_login_view_wrong_input(self):
         """testing login view with wrong password"""
@@ -85,3 +87,49 @@ class PublicViewUnitTest(TestCase):
         response = self.client.post(url, data={'username': 'hiwa@gmail.com', 'password': 'hiwa'})
         self.assertEqual(response.status_code, 400)
         self.assertIn('Please enter a correct username and password', str(response.content, encoding='utf-8'))
+        self.assertNotIn('_auth_user_id', self.client.session)
+
+    def test_register_view(self):
+        """test getting register view"""
+        url = reverse('register')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('form', response.context)
+
+    def test_register_view_post(self):
+        """test registering a user"""
+        data = {
+            'username': 'hiwa@gmail.com',
+            'password1': 'hiwa_asdf',
+            'password2': 'hiwa_asdf'
+        }
+        url = reverse('register')
+        response = self.client.post(url, data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {'msg': 'user created'})
+        self.assertIn('_auth_user_id', self.client.session)
+
+    def test_registering_with_wrong_input(self):
+        """test registering with short password"""
+        url = reverse('register')
+        data = {
+            'username': 'hiwa@gmail.com',
+            'password1': 'hiwa',
+            'password2': 'hiwa'
+        }
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, 400)
+        self.assertNotIn('_auth_user_id', self.client.session)
+
+    def test_log_out(self):
+        """testing logout user"""
+        url = reverse('logout')
+        data = {'username': 'hiwa@gmail.com', 'password': 'hiwa_asdf'}
+        user = User.objects.create_user(**data)
+        self.client.force_login(user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn('_auth_user_id', self.client.session)
+        self.assertEquals(response.json(), {'msg': 'logged out'})
+
+    # def test
