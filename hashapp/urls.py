@@ -14,8 +14,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from sha256 import views as ShaViews
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('login/', ShaViews.LoginView.as_view(), name='login'),
+    path('', include('sha256.urls')),
+
 ]

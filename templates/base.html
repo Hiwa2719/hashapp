@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<!--{% load static %}-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!--    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">-->
+    <link rel="stylesheet" href="../static/css/bootstrap.css">
+    <title>Title</title>
+</head>
+<body class="bg-dark overflow-hidden">
+
+<div class="d-flex align-items-center justify-content-center" style="height: 100vh;">
+    <div class="row my-5">
+        <div class="col-10 col-sm-12 mx-auto">
+            <div class="bg-light rounded d-flex flex-column">
+                <div class="authentication my-1 align-self-end mr-2 mb-5 text-primary pointer-event">
+                    <a href="" class="register">Register</a>/
+                    <a href="" class="login">Login</a>
+                    <a href="{% url 'sha256:account' %}" class="d-none">My Account</a>
+                    <a href="{% url 'logout' %}" class="logout d-none">Log out</a>
+                </div>
+                <h1 class="text-center">SHA256 Generator</h1>
+                <div class="hashForm px-5 pt-3">
+                    <form>
+                        <label for="text">Text</label>
+                        <textarea name="text" id="text" cols="60" rows="10" class="form-control"></textarea>
+                    </form>
+                </div>
+                <div class="buttons my-3 d-flex justify-content-center">
+                    <button class="btn btn-warning mr-3 generate">Generate Hash</button>
+                    <button class="btn btn-primary clear">Clear</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-sec">
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary d-none modal-btn" data-toggle="modal" data-target="#exampleModal">
+      Launch demo modal
+    </button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-body">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+              <h5 class="text-center">Register</h5>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+<script src="../static/js/jquery.js"></script>
+<script src="../static/js/popper.js"></script>
+<script src="../static/js/bootstrap.js"></script>
+<script src="../static/js/CustomJs.js"></script>
+<!--<script src="{% static 'js/jquery.js' %}"></script>-->
+<!--<script src="{% static 'js/popper.js' %}"></script>-->
+<!--<script src="{% static 'js/bootstrap.js' %}"></script>-->
+</body>
+</html>
