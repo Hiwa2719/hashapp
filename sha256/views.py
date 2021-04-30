@@ -89,7 +89,9 @@ class RegisterView(FormView):
 
 class LogoutView(LogOutView):
     def render_to_response(self, context, **response_kwargs):
-        return JsonResponse({'msg': 'logged out'})
+        if self.request.is_ajax():
+            return JsonResponse({'msg': 'logged out'})
+        return HttpResponseRedirect(reverse('index'))
 
 
 class AccountView(LoginRequiredMixin, TemplateView):

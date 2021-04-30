@@ -195,29 +195,27 @@ class PublicViewUnitTest(TestCase):
         self.assertTrue(response.context.get('form').errors)
         self.assertNotIn('_auth_user_id', self.client.session)
 
-    def test_log_out(self):
-        """testing logout user"""
-        url = reverse('logout')
+
+class PrivateUniteTests(TestCase):
+
+    def setUp(self) -> None:
         data = {'username': 'hiwa@gmail.com', 'password': 'hiwa_asdf'}
         user = User.objects.create_user(**data)
         self.client.force_login(user)
-        response = self.client.get(url)
+        self.ajax_header = {'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'}
+        self.account_url = reverse('account')
+
+    def test_log_out(self):
+        """testing logout user"""
+        url = reverse('logout')
+        response = self.client.get(url, **self.ajax_header)
         self.assertEqual(response.status_code, 200)
         self.assertNotIn('_auth_user_id', self.client.session)
         self.assertEquals(response.json(), {'msg': 'logged out'})
 
-    def test_account_saved_hashes_without_login(self):
-        """test getting account saved hashes"""
-        url = reverse('account')
-        response = self.client.get(url, follow=True)
+    def test_getting_account_url(self):
+        """test accessing account url"""
+        response = self.client.get(self.account_url)
         self.assertEqual(response.status_code, 200)
-        self.assertIn('form', response.context)
-        self.assertEqual(response.context.get('form').__class__, AuthenticationForm)
-        print(dir(response.client))
+        self.assertTemplateUsed(response, 'sha256/account.html')
 
-    # def test_login_view_with_template_and_and_next_url(self):
-    #     """testing login view with redirect url"""
-    #     data = {'username': 'hiwa@gmail.com', 'password': 'hiwa_asdf'}
-    #     user = User.objects.create_user(**data)
-    #     url = reverse('login2')
-    #     response = self.client.post(url, data=data)
