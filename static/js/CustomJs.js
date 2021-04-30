@@ -10,7 +10,7 @@ $(document).ready(function () {
         $.ajax({
             url: '/hash-gen/',
             method: 'POST',
-            data: form.serialize(),
+            data: hashForm.serialize(),
             success: function (data){
                 console.log('success')
             },
@@ -43,27 +43,33 @@ $(document).ready(function () {
         })
     })
 
-    // register button
-    let registerButton = $('.authentication .register')
-    registerButton.click(function (event){
-        event.preventDefault();
-        let buttonText = $(this).text()
-        $('.modal-body h5').text(buttonText)
-
+    function registerLogin(event, thisObj, url){
+        event.preventDefault()
+        $('.modal-body').text($(thisObj).text())
         $.ajax({
-            url: '/register/',
+            url: url,
             method: 'GET',
-            success: function (data){
-                console.log('success')
-                let modalBodyInner = $('.modal-body .modal-body-inner')
-                modalBodyInner.html(data.form)
+            success: function(data){
+                console.log('succes')
+                $('.modal-body .modal-body-inner').html(data.form)
                 $('.modal-btn').click()
             },
-            error: function (errorData){
+            errror: function (errorData){
                 console.log('error')
                 console.log(errorData)
             }
         })
+    }
+
+    // register button
+    let registerButton = $('.authentication .register')
+    registerButton.click(function (event){
+        registerLogin(event, this, '/register/')
+    })
+
+    let loginButton = $('.authentication .login')
+    loginButton.click(function (event){
+        registerLogin(event, this, '/login/')
     })
 
     // logout button
@@ -85,4 +91,8 @@ $(document).ready(function () {
             }
         })
     })
+
+    //account-page
+
+
 })

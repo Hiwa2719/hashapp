@@ -132,4 +132,10 @@ class PublicViewUnitTest(TestCase):
         self.assertNotIn('_auth_user_id', self.client.session)
         self.assertEquals(response.json(), {'msg': 'logged out'})
 
-    # def test
+    def test_account_saved_hashes_without_login(self):
+        """test getting account saved hashes"""
+        url = reverse('account')
+        response = self.client.get(url, follow=True)
+        print(response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('form', response.context)

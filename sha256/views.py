@@ -1,6 +1,9 @@
 import hashlib
 from django.contrib.auth import authenticate, get_user_model, login
+from django.contrib.auth.views import LoginView
+from django.views.generic import TemplateView
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LogoutView as LogOutView
 from django.http import JsonResponse
 from django.shortcuts import redirect
@@ -41,6 +44,8 @@ class LoginView(FormView):
         return self.form_invalid(form)
 
     def render_to_response(self, context, **response_kwargs):
+        if self.template_name:
+            return super().render_to_response(context, **response_kwargs)
         if context['form'].errors:
             status = 400
         else:
@@ -67,3 +72,7 @@ class RegisterView(LoginView):
 class LogoutView(LogOutView):
     def render_to_response(self, context, **response_kwargs):
         return JsonResponse({'msg': 'logged out'})
+
+
+class AccountView(LoginRequiredMixin, TemplateView):
+    template_name = 'sha256/account.html'
