@@ -1,0 +1,13 @@
+
+
+<div class="d-flex flex-column">
+    <h3>Are you sure to delete this account?</h3>
+    <div class="">
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" value="{{ user.id }}">
+            <input type="submit" value="Yes" class="btn btn-outline-danger">
+        </form>
+        <button class="btn btn-success">Cancel</button>
+    </div>
+</div>

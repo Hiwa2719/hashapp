@@ -23,6 +23,6 @@ urlpatterns = [
     path('register/', ShaViews.RegisterView.as_view(), name='register'),
     path('logout/', ShaViews.LogoutView.as_view(), name='logout'),
     path('account/', ShaViews.AccountView.as_view(), name='account'),
-    path('delete-account/', ShaViews.DeleteAccountView.as_view(), name='delete-account'),
+    path('delete-account/<int:pk>/', ShaViews.DeleteAccountView.as_view(), name='delete-account'),
     path('', include('sha256.urls')),
 ]

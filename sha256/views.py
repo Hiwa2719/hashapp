@@ -1,12 +1,12 @@
 import hashlib
-from django.contrib.auth import authenticate, get_user_model, login
+from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.views import LoginView
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, DeleteView
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LogoutView as LogOutView
 from django.http import JsonResponse, HttpResponseRedirect
-from django.shortcuts import redirect
+# from django.contrib.auth.urls import
 from django.urls import reverse_lazy, reverse
 from django.template.loader import render_to_string
 from django.views.generic import FormView, View
@@ -98,5 +98,16 @@ class AccountView(LoginRequiredMixin, TemplateView):
     template_name = 'sha256/account.html'
 
 
-class DeleteAccountView(View):
-    pass
+class DeleteAccountView(LoginRequiredMixin, DeleteView):
+    model = User
+    success_url = '/'
+
+    def delete(self, request, *args, **kwargs):
+        logout(request)
+        return super().delete(request, *args, **kwargs)
+
+    def render_to_response(self, context, **response_kwargs):
+        if self.request.is_ajax():
+            render_modal_body = render_to_string('sha256/delete_account.html', context={'user': self.request.user},
+                                                 request=self.request)
+            return JsonResponse({'modal-body': render_modal_body})

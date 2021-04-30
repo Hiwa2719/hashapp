@@ -200,8 +200,8 @@ class PrivateUniteTests(TestCase):
 
     def setUp(self) -> None:
         data = {'username': 'hiwa@gmail.com', 'password': 'hiwa_asdf'}
-        user = User.objects.create_user(**data)
-        self.client.force_login(user)
+        self.user = User.objects.create_user(**data)
+        self.client.force_login(self.user)
         self.ajax_header = {'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'}
         self.account_url = reverse('account')
 
@@ -219,3 +219,32 @@ class PrivateUniteTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'sha256/account.html')
 
+    def test_delete_account_get(self):
+        """test delete account"""
+        url = reverse('delete-account', kwargs={'pk': self.user.id})
+        response = self.client.get(url, **self.ajax_header)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Are you sure to delete this account?', str(response.content, encoding='utf-8'))
+
+    def test_delete_account_post(self):
+        """test finalizing the deletion"""
+        url = reverse('delete-account', kwargs={'pk': self.user.id})
+        response = self.client.post(url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        with self.assertRaises(User.DoesNotExist):
+            User.objects.get(id=self.user.id)
+        self.assertURLEqual(response.request.get('PATH_INFO'), '/')
+        self.assertNotIn('_auth_user_id', self.client.session)
+
+    def test_change_password_get(self):
+        """test changing pass"""
+        url = reverse('pass-change')
+        response = self.client.get(url, **self.ajax_header)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('form', response.json())
+        print(response.content)
+
+    # def test_change_password_post(self):
+    #     """test changing password with post method"""
+    #     url = reverse('pass-change')
+    #     response = self.client.post(url, )
