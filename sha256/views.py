@@ -5,8 +5,9 @@ from django.views.generic import TemplateView
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LogoutView as LogOutView
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import redirect
+from django.urls import reverse_lazy, reverse
 from django.template.loader import render_to_string
 from django.views.generic import FormView, View
 
@@ -32,30 +33,38 @@ class HashGenerator(View):
         return JsonResponse({'msg': 'invalid text'}, status=400)
 
 
-class LoginView(FormView):
+class UserLoginView(LoginView):
     form_class = AuthenticationForm
+    success_url = reverse_lazy('account')
 
     def form_valid(self, form):
         user = authenticate(request=self.request, **form.cleaned_data)
         if user:
             login(self.request, user)
-            return JsonResponse({'msg': 'authentication successful'})
+            if self.request.is_ajax():
+                return JsonResponse({'msg': 'authentication successful'})
+            return HttpResponseRedirect(self.get_success_url())
         form.add_error(None, 'Wrong username/password please try again')
         return self.form_invalid(form)
 
+    def get_success_url(self):
+        url = self.get_redirect_url()
+        return url if url else self.success_url
+
     def render_to_response(self, context, **response_kwargs):
-        if self.template_name:
-            return super().render_to_response(context, **response_kwargs)
         if context['form'].errors:
             status = 400
         else:
             status = 200
-        rendered_form = render_to_string('sha256/form.html', context, request=self.request)
-        return JsonResponse({'form': rendered_form}, status=status)
+        if self.request.is_ajax():
+            rendered_form = render_to_string('sha256/form.html', context, request=self.request)
+            return JsonResponse({'form': rendered_form}, status=status)
+        return super().render_to_response(context, **response_kwargs)
 
 
-class RegisterView(LoginView):
+class RegisterView(FormView):
     form_class = UserCreationForm
+    template_name = 'registration/login.html'
 
     def form_valid(self, form):
         username = form.cleaned_data.get('username')
@@ -66,7 +75,16 @@ class RegisterView(LoginView):
         )
         user = authenticate(self.request, username=username, password=password)
         login(self.request, user)
-        return JsonResponse({'msg': 'user created'})
+        if self.request.is_ajax():
+            return JsonResponse({'msg': 'user created'})
+        return HttpResponseRedirect(reverse('account'))
+
+    def render_to_response(self, context, **response_kwargs):
+        if self.request.is_ajax():
+            rendered_form = render_to_string('sha256/form.html', context, request=self.request)
+            return JsonResponse({'form': rendered_form},
+                                status=400 if context['form'].errors else 200)
+        return super().render_to_response(context, **response_kwargs)
 
 
 class LogoutView(LogOutView):
@@ -76,3 +94,7 @@ class LogoutView(LogOutView):
 
 class AccountView(LoginRequiredMixin, TemplateView):
     template_name = 'sha256/account.html'
+
+
+class DeleteAccountView(View):
+    pass

@@ -54,7 +54,7 @@ $(document).ready(function () {
                 $('.modal-body .modal-body-inner').html(data.form)
                 $('.modal-btn').click()
             },
-            errror: function (errorData){
+            error: function (errorData){
                 console.log('error')
                 console.log(errorData)
             }
