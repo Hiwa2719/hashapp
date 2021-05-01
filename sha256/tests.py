@@ -274,7 +274,36 @@ class PrivateUniteTests(TestCase):
 
     def test_display_save_text_hash(self):
         """test getting saved text/hashes"""
-        Hash.objects.create(text='hello', hash='2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824')
-        url = reverse('hash-list')
+        Hash.objects.create(user=self.user,
+                            text='hello',
+                            hash='2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824')
+        url = reverse('sha256:hash-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+        content_str = str(response.content, encoding='utf-8')
+        self.assertIn('hello', content_str)
+        self.assertIn('2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824', content_str)
+
+    def test_display_saved_text_hash_with_query(self):
+        """filtering down the saved texts"""
+        Hash.objects.create(user=self.user,
+                            text='hello',
+                            hash='2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824')
+        Hash.objects.create(user=self.user,
+                            text='world',
+                            hash='486EA46224D1BB4FB680F34F7C9AD96A8F24EC88BE73EA8E5A6C65260E9CB8A7')
+        url = reverse('sha256:hash-list')
+        response = self.client.get(url + '?q=hello')
+        self.assertEqual(response.status_code, 200)
+        content_str = str(response.content, encoding='utf-8')
+        self.assertIn('hello', content_str)
+        self.assertIn('2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824', content_str)
+        self.assertNotIn('486EA46224D1BB4FB680F34F7C9AD96A8F24EC88BE73EA8E5A6C65260E9CB8A7', content_str)
+        self.assertNotIn('world', content_str)
+
+    def test_display_saved_text_hash_with_wrong_query(self):
+        """searing for unavailable key """
+        url = reverse('sha256:hash-list')
+        response = self.client.get(url + '?q=hello')
+        content_str = str(response.content, encoding='utf-8')
+        self.assertIn('No data', content_str)

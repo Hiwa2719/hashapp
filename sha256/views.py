@@ -1,15 +1,16 @@
 import hashlib
 from django.contrib.auth import authenticate, get_user_model, login, logout, update_session_auth_hash
 from django.contrib.auth.views import LoginView
-from django.views.generic import TemplateView, DeleteView
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LogoutView as LogOutView, PasswordChangeView
+from django.db.models import Q
 from django.http import JsonResponse, HttpResponseRedirect
 # from django.contrib.auth.urls import
 from django.urls import reverse_lazy, reverse
 from django.template.loader import render_to_string
-from django.views.generic import FormView, View
+from django.views.generic import FormView, View, ListView
+from django.views.generic import TemplateView, DeleteView
 
 from .models import Hash
 from .forms import HashForm
@@ -117,7 +118,6 @@ class PasswordChange(PasswordChangeView):
 
     def render_to_response(self, context, **response_kwargs):
         if context['form'].errors:
-            print(context['form'].errors)
             status = 400
         else:
             status = 200
@@ -128,3 +128,16 @@ class PasswordChange(PasswordChangeView):
         form.save()
         update_session_auth_hash(self.request, form.user)
         return JsonResponse({'msg': 'password successfully changed'})
+
+
+class HashListView(LoginRequiredMixin, ListView):
+    def render_to_response(self, context, **response_kwargs):
+        render_list = render_to_string('sha256/saved_hashes.html', context=context)
+        return JsonResponse({'list': render_list})
+
+    def get_queryset(self):
+        queryset = Hash.objects.filter(user=self.request.user)
+        query = self.request.GET.get('q')
+        if query:
+            queryset = queryset.filter(Q(text=query) | Q(hash=query))
+        return queryset

@@ -1,0 +1,39 @@
+
+
+
+<div class="">
+    <div class="search">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Add words here">
+                <input type="submit" value="Search" class="btn btn-warning">
+            </div>
+        </form>
+    </div>
+
+    <table class="table table-striped">
+        {% if hash_list %}
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Text</th>
+            <th scope="col">Hash</th>
+            <th scope="col">created date</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for item in hash_list %}
+        <tr>
+            <th scope="row">{{forloop.counter}}</th>
+            <td>{{item.text}}</td>
+            <td>{{item.hash}}</td>
+            <td>{{item.created_date}}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+        {% else %}
+        <h3>No data <strong>Found</strong></h3>
+        {% endif %}
+    </table>
+</div>
