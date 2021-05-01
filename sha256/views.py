@@ -1,10 +1,10 @@
 import hashlib
-from django.contrib.auth import authenticate, get_user_model, login, logout
+from django.contrib.auth import authenticate, get_user_model, login, logout, update_session_auth_hash
 from django.contrib.auth.views import LoginView
 from django.views.generic import TemplateView, DeleteView
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LogoutView as LogOutView
+from django.contrib.auth.views import LogoutView as LogOutView, PasswordChangeView
 from django.http import JsonResponse, HttpResponseRedirect
 # from django.contrib.auth.urls import
 from django.urls import reverse_lazy, reverse
@@ -111,3 +111,20 @@ class DeleteAccountView(LoginRequiredMixin, DeleteView):
             render_modal_body = render_to_string('sha256/delete_account.html', context={'user': self.request.user},
                                                  request=self.request)
             return JsonResponse({'modal-body': render_modal_body})
+
+
+class PasswordChange(PasswordChangeView):
+
+    def render_to_response(self, context, **response_kwargs):
+        if context['form'].errors:
+            print(context['form'].errors)
+            status = 400
+        else:
+            status = 200
+        render_form = render_to_string('sha256/form.html', context=context, request=self.request)
+        return JsonResponse({'form': render_form}, status=status)
+
+    def form_valid(self, form):
+        form.save()
+        update_session_auth_hash(self.request, form.user)
+        return JsonResponse({'msg': 'password successfully changed'})

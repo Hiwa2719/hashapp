@@ -24,5 +24,6 @@ urlpatterns = [
     path('logout/', ShaViews.LogoutView.as_view(), name='logout'),
     path('account/', ShaViews.AccountView.as_view(), name='account'),
     path('delete-account/<int:pk>/', ShaViews.DeleteAccountView.as_view(), name='delete-account'),
+    path('pass-change/', ShaViews.PasswordChange.as_view(), name='pass-change'),
     path('', include('sha256.urls')),
 ]

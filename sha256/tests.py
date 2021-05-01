@@ -242,9 +242,39 @@ class PrivateUniteTests(TestCase):
         response = self.client.get(url, **self.ajax_header)
         self.assertEqual(response.status_code, 200)
         self.assertIn('form', response.json())
-        print(response.content)
+        self.assertIn('old_password', response.json().get('form'))
 
-    # def test_change_password_post(self):
-    #     """test changing password with post method"""
-    #     url = reverse('pass-change')
-    #     response = self.client.post(url, )
+    def test_change_password_post(self):
+        """test changing password with post method"""
+        url = reverse('pass-change')
+        data = {
+            'old_password': 'hiwa_asdf',
+            'new_password1': 'asdf_hiwa',
+            'new_password2': 'asdf_hiwa'
+        }
+        response = self.client.post(url, data=data, **self.ajax_header)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {'msg': 'password successfully changed'})
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password('asdf_hiwa'))
+
+    def test_change_password_post_wrong_input(self):
+        """sending wrong inputs to password change"""
+        url = reverse('pass-change')
+        data = {
+            'old_password': 'hiwa_asdf',
+            'new_password1': 'hiwa',
+            'new_password2': 'hiwa'
+        }
+        response = self.client.post(url , data=data)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('password is too short', str(response.content, encoding='utf-8'))
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password('hiwa_asdf'))
+
+    def test_display_save_text_hash(self):
+        """test getting saved text/hashes"""
+        Hash.objects.create(text='hello', hash='2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824')
+        url = reverse('hash-list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
