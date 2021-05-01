@@ -1,4 +1,3 @@
-import json
 from django.test import TestCase
 from django.contrib.auth import get_user_model, get_user
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
@@ -307,3 +306,13 @@ class PrivateUniteTests(TestCase):
         response = self.client.get(url + '?q=hello')
         content_str = str(response.content, encoding='utf-8')
         self.assertIn('No data', content_str)
+
+    def test_save_hash(self):
+        """saving entered text/hash"""
+        url = reverse('sha256:save-text-hash')
+        response = self.client.post(url,
+                                    data={'text': 'hello'})
+        self.assertEqual(response.status_code, 201)
+        queryset = Hash.objects.filter(text='hello')
+        self.assertEqual(queryset.count(), 1)
+        self.assertEqual(queryset.first().hash, '2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824')

@@ -9,13 +9,17 @@ from django.http import JsonResponse, HttpResponseRedirect
 # from django.contrib.auth.urls import
 from django.urls import reverse_lazy, reverse
 from django.template.loader import render_to_string
-from django.views.generic import FormView, View, ListView
+from django.views.generic import FormView, View, ListView, CreateView
 from django.views.generic import TemplateView, DeleteView
 
 from .models import Hash
 from .forms import HashForm
 
 User = get_user_model()
+
+
+def hash_generator(text):
+    return hashlib.sha256(text.encode('utf-8')).hexdigest()
 
 
 class IndexView(FormView):
@@ -29,7 +33,7 @@ class HashGenerator(View):
         form = HashForm(request.POST or None)
         if form.is_valid():
             text = form.cleaned_data.get('text')
-            hash = hashlib.sha256(text.encode('utf-8')).hexdigest()
+            hash = hash_generator(text)
             return JsonResponse({'hash': hash})
         return JsonResponse({'msg': 'invalid text'}, status=400)
 
@@ -141,3 +145,17 @@ class HashListView(LoginRequiredMixin, ListView):
         if query:
             queryset = queryset.filter(Q(text=query) | Q(hash=query))
         return queryset
+
+
+class SaveHash(LoginRequiredMixin, CreateView):
+    form_class = HashForm
+    model = Hash
+
+    def form_valid(self, form):
+        text = form.cleaned_data.get('text')
+        hash = form.save(user=self.request.user, hash=hash_generator(text))
+        return JsonResponse({hash.text: hash.hash}, status=201)
+
+    def render_to_response(self, context, **response_kwargs):
+        render_form = render_to_string('sha256/form.html', context=context, request=self.request)
+        return JsonResponse({'form': render_form})
